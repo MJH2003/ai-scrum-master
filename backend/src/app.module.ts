@@ -1,5 +1,7 @@
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { APP_GUARD } from '@nestjs/core';
+import { ConfigService } from '@nestjs/config';
+import { BullModule } from '@nestjs/bullmq';
 import { ConfigModule } from './config';
 import { LoggerModule } from './common/logger';
 import { CorrelationIdMiddleware } from './common/middleware';
@@ -15,6 +17,9 @@ import { SprintsModule } from './modules/sprints';
 import { EventsModule } from './modules/events';
 import { RealtimeModule } from './modules/realtime';
 import { AIModule } from './modules/ai';
+import { AnalyticsModule } from './modules/analytics';
+import { InsightsModule } from './modules/insights';
+import { JobsModule } from './modules/jobs';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 
@@ -24,6 +29,17 @@ import { AppService } from './app.service';
     ConfigModule,
     LoggerModule,
     DatabaseModule,
+
+    // BullMQ for background jobs
+    BullModule.forRootAsync({
+      inject: [ConfigService],
+      useFactory: (config: ConfigService) => ({
+        connection: {
+          host: config.get<string>('redis.host', 'localhost'),
+          port: config.get<number>('redis.port', 6379),
+        },
+      }),
+    }),
 
     // Feature modules
     HealthModule,
@@ -37,6 +53,9 @@ import { AppService } from './app.service';
     EventsModule,
     RealtimeModule,
     AIModule,
+    AnalyticsModule,
+    InsightsModule,
+    JobsModule,
   ],
   controllers: [AppController],
   providers: [
