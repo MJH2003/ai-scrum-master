@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: ai-scrum-master
+  labels:
+    app.kubernetes.io/name: ai-scrum-master
+    app.kubernetes.io/component: backend
