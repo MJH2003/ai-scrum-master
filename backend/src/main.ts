@@ -83,6 +83,15 @@ async function bootstrap() {
         },
         'JWT-auth',
       )
+      .addApiKey(
+        {
+          type: 'apiKey',
+          name: 'X-API-Key',
+          in: 'header',
+          description: 'API key for external integrations',
+        },
+        'API-Key',
+      )
       .addTag('Health', 'Health check endpoints')
       .addTag('Auth', 'Authentication endpoints')
       .addTag('Users', 'User management')
@@ -94,6 +103,7 @@ async function bootstrap() {
       .addTag('AI', 'AI agents and proposals')
       .addTag('Chat', 'Project chat')
       .addTag('Insights', 'Project insights and analytics')
+      .addTag('Metrics', 'Application metrics and monitoring')
       .build();
 
     const document = SwaggerModule.createDocument(app, swaggerConfig);
