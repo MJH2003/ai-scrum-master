@@ -3,6 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../../database/prisma.service';
 import { OpenAIProvider } from './providers/openai.provider';
 import { AnthropicProvider } from './providers/anthropic.provider';
+import { GeminiProvider } from './providers/gemini.provider';
 import { BaseAIProvider } from './providers/base.provider';
 import {
   AIProvider,
@@ -39,6 +40,7 @@ export class AIService implements OnModuleInit {
     private readonly prisma: PrismaService,
     private readonly openaiProvider: OpenAIProvider,
     private readonly anthropicProvider: AnthropicProvider,
+    private readonly geminiProvider: GeminiProvider,
   ) {}
 
   onModuleInit() {
@@ -53,13 +55,23 @@ export class AIService implements OnModuleInit {
       this.logger.log('Anthropic provider initialized');
     }
 
-    // Set default provider based on availability
+    if (this.geminiProvider.isAvailable()) {
+      this.providers.set(AIProvider.GEMINI, this.geminiProvider);
+      this.logger.log('Gemini provider initialized');
+    }
+
+    // Set default provider based on availability (prefer Gemini for cost-effective testing)
     if (!this.providers.has(this.defaultProvider)) {
-      const available = Array.from(this.providers.keys());
-      if (available.length > 0) {
-        this.defaultProvider = available[0];
-        this.logger.warn(`Default provider not available, using ${this.defaultProvider}`);
-      } else {
+      // Priority: Gemini (cheapest) > OpenAI > Anthropic
+      const priorityOrder = [AIProvider.GEMINI, AIProvider.OPENAI, AIProvider.ANTHROPIC];
+      for (const provider of priorityOrder) {
+        if (this.providers.has(provider)) {
+          this.defaultProvider = provider;
+          this.logger.warn(`Default provider not available, using ${this.defaultProvider}`);
+          break;
+        }
+      }
+      if (this.providers.size === 0) {
         this.logger.warn('No AI providers configured!');
       }
     }

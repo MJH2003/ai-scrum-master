@@ -3,6 +3,7 @@ import { AIService } from './ai.service';
 import { ContextBuilderService } from './context-builder.service';
 import { OpenAIProvider } from './providers/openai.provider';
 import { AnthropicProvider } from './providers/anthropic.provider';
+import { GeminiProvider } from './providers/gemini.provider';
 import { ProposalsService, ProposalsController } from './proposals';
 import { AgentsService, AgentsController } from './agents';
 import { ChatService, ChatController } from './chat';
@@ -15,6 +16,7 @@ import { ChatService, ChatController } from './chat';
     ContextBuilderService,
     OpenAIProvider,
     AnthropicProvider,
+    GeminiProvider,
     ProposalsService,
     AgentsService,
     ChatService,
