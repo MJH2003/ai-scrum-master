@@ -3,7 +3,7 @@
 # ============================================
 # Stage 1: Dependencies
 # ============================================
-FROM node:20-alpine AS deps
+FROM node:22-alpine AS deps
 
 RUN corepack enable && corepack prepare pnpm@latest --activate
 
@@ -18,7 +18,7 @@ RUN pnpm install --frozen-lockfile
 # ============================================
 # Stage 2: Builder
 # ============================================
-FROM node:20-alpine AS builder
+FROM node:22-alpine AS builder
 
 RUN corepack enable && corepack prepare pnpm@latest --activate
 
@@ -37,7 +37,7 @@ RUN pnpm build
 # ============================================
 # Stage 3: Production
 # ============================================
-FROM node:20-alpine AS production
+FROM node:22-alpine AS production
 
 RUN corepack enable && corepack prepare pnpm@latest --activate
 
