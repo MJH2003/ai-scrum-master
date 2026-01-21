@@ -14,9 +14,12 @@ describe('AppController', () => {
     appController = app.get<AppController>(AppController);
   });
 
-  describe('root', () => {
-    it('should return "Hello World!"', () => {
-      expect(appController.getHello()).toBe('Hello World!');
+  describe('getInfo', () => {
+    it('should return API info', () => {
+      const result = appController.getInfo();
+      expect(result).toHaveProperty('name', 'AI Scrum Master API');
+      expect(result).toHaveProperty('version');
+      expect(result).toHaveProperty('description');
     });
   });
 });

@@ -6,6 +6,10 @@ import { AnthropicProvider } from './providers/anthropic.provider';
 import { GeminiProvider } from './providers/gemini.provider';
 import { BaseAIProvider } from './providers/base.provider';
 import {
+  CircuitBreakerFactory,
+  CircuitBreakerOpenError,
+} from '../../common/utils/circuit-breaker';
+import {
   AIProvider,
   AICompletionRequest,
   AICompletionResponse,
@@ -119,11 +123,17 @@ export class AIService implements OnModuleInit {
       );
     }
 
-    // Execute with retry
+    // Execute with retry and circuit breaker
+    const circuitBreaker = CircuitBreakerFactory.getOrCreate(`ai-${options?.provider || this.defaultProvider}`, {
+      failureThreshold: 5,
+      successThreshold: 2,
+      resetTimeout: 60000, // 1 minute
+    });
+
     let lastError: Error | null = null;
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
       try {
-        const response = await provider.complete(request);
+        const response = await circuitBreaker.execute(() => provider.complete(request));
 
         // Cache successful response
         if (useCache && !request.stream) {
@@ -148,14 +158,15 @@ export class AIService implements OnModuleInit {
         }
 
         return response;
-      } catch (error: any) {
-        lastError = error;
+      } catch (error: unknown) {
+        const err = error as Error;
+        lastError = err;
         this.logger.warn(
-          `AI completion attempt ${attempt}/${maxRetries} failed: ${error.message}`,
+          `AI completion attempt ${attempt}/${maxRetries} failed: ${err.message}`,
         );
 
-        // Don't retry on certain errors
-        if (this.isNonRetryableError(error)) {
+        // Don't retry on circuit breaker open or non-retryable errors
+        if (error instanceof CircuitBreakerOpenError || this.isNonRetryableError(err)) {
           throw error;
         }
 

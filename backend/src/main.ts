@@ -3,6 +3,7 @@ import { ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import helmet from 'helmet';
+import compression from 'compression';
 import { AppModule } from './app.module';
 import { LoggerService } from './common/logger/logger.service';
 import { GlobalExceptionFilter } from './common/filters/global-exception.filter';
@@ -18,8 +19,23 @@ async function bootstrap() {
 
   app.useLogger(logger);
 
-  // Security
-  app.use(helmet());
+  // Security Headers
+  app.use(
+    helmet({
+      contentSecurityPolicy: {
+        directives: {
+          defaultSrc: ["'self'"],
+          styleSrc: ["'self'", "'unsafe-inline'"],
+          imgSrc: ["'self'", 'data:', 'https:'],
+          scriptSrc: ["'self'"],
+        },
+      },
+      crossOriginEmbedderPolicy: false, // Allow embedding for Swagger UI
+    }),
+  );
+
+  // Response Compression
+  app.use(compression());
 
   // CORS
   const corsOrigins = configService.get<string>('CORS_ORIGINS')?.split(',') || [];
