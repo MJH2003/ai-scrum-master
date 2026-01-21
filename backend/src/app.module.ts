@@ -14,6 +14,7 @@ import { TasksModule } from './modules/tasks';
 import { SprintsModule } from './modules/sprints';
 import { EventsModule } from './modules/events';
 import { RealtimeModule } from './modules/realtime';
+import { AIModule } from './modules/ai';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 
@@ -35,6 +36,7 @@ import { AppService } from './app.service';
     SprintsModule,
     EventsModule,
     RealtimeModule,
+    AIModule,
   ],
   controllers: [AppController],
   providers: [

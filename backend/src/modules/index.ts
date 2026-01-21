@@ -7,3 +7,4 @@ export * from './tasks';
 export * from './sprints';
 export * from './events';
 export * from './realtime';
+export * from './ai';

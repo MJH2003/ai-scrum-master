@@ -216,6 +216,7 @@ export class EventEmitterService implements OnModuleInit {
       userId?: string;
       userName?: string;
       entityTitle?: string;
+      aiTriggered?: boolean;
     },
   ): Promise<void> {
     await this.emit({

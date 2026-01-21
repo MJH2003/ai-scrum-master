@@ -29,6 +29,7 @@
     "docker:down": "docker-compose down"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.71.2",
     "@nestjs/common": "^11.0.1",
     "@nestjs/config": "^3.3.0",
     "@nestjs/core": "^11.0.1",
@@ -45,11 +46,13 @@
     "class-validator": "^0.14.1",
     "helmet": "^8.0.0",
     "ioredis": "^5.4.2",
+    "openai": "^6.16.0",
     "passport": "^0.7.0",
     "passport-jwt": "^4.0.1",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.1",
     "socket.io": "^4.8.3",
+    "tiktoken": "^1.0.22",
     "uuid": "^11.0.5"
   },
   "devDependencies": {
