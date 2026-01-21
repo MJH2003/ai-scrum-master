@@ -8,6 +8,10 @@ import { HealthModule } from './health';
 import { AuthModule, JwtAuthGuard } from './modules/auth';
 import { UsersModule } from './modules/users';
 import { ProjectsModule } from './modules/projects';
+import { EpicsModule } from './modules/epics';
+import { StoriesModule } from './modules/stories';
+import { TasksModule } from './modules/tasks';
+import { SprintsModule } from './modules/sprints';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 
@@ -23,6 +27,10 @@ import { AppService } from './app.service';
     AuthModule,
     UsersModule,
     ProjectsModule,
+    EpicsModule,
+    StoriesModule,
+    TasksModule,
+    SprintsModule,
   ],
   controllers: [AppController],
   providers: [
