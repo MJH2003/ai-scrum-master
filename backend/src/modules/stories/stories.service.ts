@@ -1,13 +1,17 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
-import { TaskStatus, Prisma } from '@prisma/client';
+import { TaskStatus, Prisma, EntityType } from '@prisma/client';
 import { PrismaService } from '../../database/prisma.service';
+import { EventEmitterService } from '../events/event-emitter.service';
 import { CreateStoryDto, UpdateStoryDto, StoryDto, StoryWithRelationsDto, StoryListItemDto } from './dto';
 
 @Injectable()
 export class StoriesService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly eventEmitter: EventEmitterService,
+  ) {}
 
-  async create(projectId: string, createStoryDto: CreateStoryDto): Promise<StoryWithRelationsDto> {
+  async create(projectId: string, createStoryDto: CreateStoryDto, userId?: string): Promise<StoryWithRelationsDto> {
     // Validate epicId belongs to the project if provided
     if (createStoryDto.epicId) {
       const epic = await this.prisma.epic.findFirst({
@@ -43,6 +47,15 @@ export class StoriesService {
         assignee: { select: { id: true, name: true, email: true } },
       },
     });
+
+    // Emit event for real-time updates
+    await this.eventEmitter.emitCreated(
+      projectId,
+      EntityType.STORY,
+      story.id,
+      { title: story.title, status: story.status, priority: story.priority, estimate: story.estimate },
+      { userId },
+    );
 
     return {
       id: story.id,
@@ -140,7 +153,7 @@ export class StoriesService {
     };
   }
 
-  async update(projectId: string, storyId: string, updateStoryDto: UpdateStoryDto): Promise<StoryDto> {
+  async update(projectId: string, storyId: string, updateStoryDto: UpdateStoryDto, userId?: string): Promise<StoryDto> {
     const story = await this.prisma.story.findFirst({
       where: { id: storyId, projectId },
     });
@@ -148,6 +161,17 @@ export class StoriesService {
     if (!story) {
       throw new NotFoundException('Story not found');
     }
+
+    // Store old values for diff
+    const oldValue = {
+      title: story.title,
+      description: story.description,
+      status: story.status,
+      priority: story.priority,
+      estimate: story.estimate,
+      epicId: story.epicId,
+      assigneeId: story.assigneeId,
+    };
 
     // Validate epicId if being changed
     if (updateStoryDto.epicId) {
@@ -183,6 +207,26 @@ export class StoriesService {
       data,
     });
 
+    // Emit update event
+    const newValue = {
+      title: updated.title,
+      description: updated.description,
+      status: updated.status,
+      priority: updated.priority,
+      estimate: updated.estimate,
+      epicId: updated.epicId,
+      assigneeId: updated.assigneeId,
+    };
+
+    await this.eventEmitter.emitUpdated(
+      projectId,
+      EntityType.STORY,
+      storyId,
+      oldValue,
+      newValue,
+      { userId },
+    );
+
     return {
       id: updated.id,
       title: updated.title,
@@ -200,7 +244,7 @@ export class StoriesService {
     };
   }
 
-  async delete(projectId: string, storyId: string): Promise<void> {
+  async delete(projectId: string, storyId: string, userId?: string): Promise<void> {
     const story = await this.prisma.story.findFirst({
       where: { id: storyId, projectId },
     });
@@ -213,5 +257,14 @@ export class StoriesService {
       await tx.task.deleteMany({ where: { storyId } });
       await tx.story.delete({ where: { id: storyId } });
     });
+
+    // Emit delete event
+    await this.eventEmitter.emitDeleted(
+      projectId,
+      EntityType.STORY,
+      storyId,
+      { title: story.title },
+      { userId },
+    );
   }
 }

@@ -23,6 +23,7 @@ import { ProjectRole } from '@prisma/client';
 import { StoriesService } from './stories.service';
 import { CreateStoryDto, UpdateStoryDto, StoryDto, StoryWithRelationsDto, StoryListItemDto } from './dto';
 import { ProjectMemberGuard, ProjectRolesGuard, ProjectRoles } from '../projects/guards';
+import { CurrentUser } from '../auth';
 
 @ApiTags('Stories')
 @ApiBearerAuth('JWT-auth')
@@ -39,8 +40,9 @@ export class StoriesController {
   async create(
     @Param('projectId') projectId: string,
     @Body() createStoryDto: CreateStoryDto,
+    @CurrentUser('id') userId: string,
   ): Promise<StoryWithRelationsDto> {
-    return this.storiesService.create(projectId, createStoryDto);
+    return this.storiesService.create(projectId, createStoryDto, userId);
   }
 
   @Get()
@@ -79,8 +81,9 @@ export class StoriesController {
     @Param('projectId') projectId: string,
     @Param('storyId') storyId: string,
     @Body() updateStoryDto: UpdateStoryDto,
+    @CurrentUser('id') userId: string,
   ): Promise<StoryDto> {
-    return this.storiesService.update(projectId, storyId, updateStoryDto);
+    return this.storiesService.update(projectId, storyId, updateStoryDto, userId);
   }
 
   @Delete(':storyId')
@@ -93,7 +96,8 @@ export class StoriesController {
   async delete(
     @Param('projectId') projectId: string,
     @Param('storyId') storyId: string,
+    @CurrentUser('id') userId: string,
   ): Promise<void> {
-    return this.storiesService.delete(projectId, storyId);
+    return this.storiesService.delete(projectId, storyId, userId);
   }
 }

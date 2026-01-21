@@ -12,6 +12,8 @@ import { EpicsModule } from './modules/epics';
 import { StoriesModule } from './modules/stories';
 import { TasksModule } from './modules/tasks';
 import { SprintsModule } from './modules/sprints';
+import { EventsModule } from './modules/events';
+import { RealtimeModule } from './modules/realtime';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 
@@ -31,6 +33,8 @@ import { AppService } from './app.service';
     StoriesModule,
     TasksModule,
     SprintsModule,
+    EventsModule,
+    RealtimeModule,
   ],
   controllers: [AppController],
   providers: [

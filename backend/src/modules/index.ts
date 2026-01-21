@@ -5,3 +5,5 @@ export * from './epics';
 export * from './stories';
 export * from './tasks';
 export * from './sprints';
+export * from './events';
+export * from './realtime';
